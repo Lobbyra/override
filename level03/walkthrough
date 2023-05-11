@@ -1,0 +1,14 @@
+1. The first think i saw is the checksec. Nearly all protections are enabled so i deduct that the only way to hack is by the value that i use.
+2. The binary is composed by 3 functions. main() -> test() -> decrypt().
+3. Here is an explaination of what they do :
+	a. main()
+		I. Print in stdout a prompt that ask for a password and call a scanf with a "%d" format.
+		II. Call the test function with the result of scanf and 0x1337d00d as parameters
+	b. test()
+		I. Substract the second parameter with the first one. (0x1337d00d - [user input as integer])
+		II. If the result is between 0 and 10 or between 0xf and 0x16, call decrypt() with the substraction result as parameter. Else, call decrypt with a random integer.
+	c. decrypt()
+		I. Do a lot of calculations with its first parameter.
+		II. This function has two ends. The first spawn a shell and the second one print "Invalid password"
+4. Know your have the explaination, i've done a really smart thing. I manually tested each possibility between 0 and 18 as the result of the substraction. 18 is the value that decrypt spawns a shell.
+5. Here is the final exploit command : (perl -e 'print "322424827"'; cat -) | ./level03 
