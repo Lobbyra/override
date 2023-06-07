@@ -1,0 +1,8 @@
+0. We firstly saw that the binary is nearly full protected with the checksec. So we deduct that we have to exploit the binary by the data we send.
+1. We saw that in the main, the program will execute a system('/bin/sh') if a function call return 0.
+ . The main listen stdin for a string and an unsigned with fgets and scanf respectivly.
+2. This function is name Auth and first check ptrace to protect against gdb, ltrace and any other live binary inspection
+3. Next to that, the program create an integer and init it to a value based on the third character.
+4. After that, the function loop into each char of the string and edit the integrer based on the value of the current character. This is like a hashing function.
+5. Finally, the function return 0 if the integer (hash) is equal to the integer from stdin.
+6. Here is a matching combinaison that get a shell : hellofriedn, 6238200
