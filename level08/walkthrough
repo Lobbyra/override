@@ -1,0 +1,6 @@
+This program creates a backup of a file specified by the user and stores it under "./backups/<argv[1]>". 
+1. ORIGINAL_FILE: The program uses the second `fopen` to read the file specified by `argv[1]`.
+2. It uses `open` to create and write the contents of the `ORIGINAL_FILE` to the backup file located at "./backups/<argv[1]>".
+
+By utilizing the "/tmp" directory, for which we have write permissions, and replicating the directory structure of "/home/user/level09" under "/tmp/.backups", we can create a backup of "/home/user/level09/.pass".
+cd /tmp && mkdir -p '/tmp/backups/home/users/level09/' && ~/level08 /home/users/level09/.pass && cat backups/home/users/level09/.pass
