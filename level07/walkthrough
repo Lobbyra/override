@@ -3,7 +3,7 @@ It uses scanf to take an index and a number from the user.
 However, it has a protection mechanism that rejects indexes divisible by 3.
 The goal is to overwrite data by finding a way to bypass this protection.
 
-1. Overwrite main EIP to redirect execution flaw and obtain a shell.
+1. Overwrite main EIP to redirect execution flow and obtain a shell.
 2. Bypass protection by causing data writing overflow to write at EIP address with a non-divisible-by-3 input value.
 3. Deduct offset between index 0 and EIP address:
    a. Open binary with gdb.
