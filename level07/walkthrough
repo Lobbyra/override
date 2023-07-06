@@ -19,10 +19,9 @@ The goal is to overwrite data by finding a way to bypass this protection.
    c. Our input will be:
       I. (UINT_MAX / 4) + CEIL(453 / 4)
       II. (4294967295 / 4) + 114
-      III. (4294967295 / 4) + 114
-      IV. CEIL(4294967295 / 4) + 114
-      V. 1073741824 + 114
-      VI. 1073741938
+      III. CEIL(4294967295 / 4) + 114
+      IV. 1073741824 + 114
+      V. 1073741938
 6. Perform ret2libc to obtain a shell, requiring the addresses of the system function and the string "/bin/sh" in libc:
    a. Open program in gdb.
    b. Run the program once and obtain system address: 0xf7e6aed0.
